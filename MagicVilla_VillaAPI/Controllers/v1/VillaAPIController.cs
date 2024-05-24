@@ -11,7 +11,7 @@ using MagicVilla_VillaAPI.Repository.IRepository;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 
-namespace MagicVilla_VillaAPI.Controllers
+namespace MagicVilla_VillaAPI.Controllers.v1
 {
     //[Route("api/[controller]")]
     [Route("api/v{version:apiVersion}/VillaAPI")]
@@ -21,11 +21,11 @@ namespace MagicVilla_VillaAPI.Controllers
         protected APIResponse _response;
         private readonly IVillaRepository _dbVilla;
         private readonly IMapper _mapper;
-        public VillaAPIController(IVillaRepository dbVilla, IMapper mapper) 
-        {  
+        public VillaAPIController(IVillaRepository dbVilla, IMapper mapper)
+        {
             _dbVilla = dbVilla;
             _mapper = mapper;
-            this._response = new();
+            _response = new();
         }
 
         [HttpGet]
@@ -34,14 +34,14 @@ namespace MagicVilla_VillaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<APIResponse>> GetVillasAsync(CancellationToken token)
         {
-            try 
+            try
             {
                 IEnumerable<Villa> villaList = await _dbVilla.GetAllAsync(token);
                 _response.Result = _mapper.Map<List<VillaDTO>>(villaList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _response.IsSuccess = false;
                 _response.ErrorMessages
@@ -61,22 +61,22 @@ namespace MagicVilla_VillaAPI.Controllers
         //[ProducesResponseType(404)]
         public async Task<ActionResult<APIResponse>> GetVillaAsync(int id, CancellationToken token)
         {
-            try 
+            try
             {
                 if (id == 0)
-                { 
-                    _response.StatusCode=HttpStatusCode.BadRequest;
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.IsSuccess = false;
-                    return BadRequest(_response); 
+                    return BadRequest(_response);
                 }
 
                 var villa = await _dbVilla.GetAsync(token, v => v.Id == id, false);
 
                 if (villa == null)
-                { 
-                    _response.StatusCode=HttpStatusCode.NotFound;
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
                     _response.IsSuccess = false;
-                    return NotFound(_response); 
+                    return NotFound(_response);
                 }
 
                 _response.Result = _mapper.Map<VillaDTO>(villa);
@@ -144,7 +144,7 @@ namespace MagicVilla_VillaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize(Roles = "CUSTOM")]
-        public async Task<ActionResult<APIResponse>> DeleteVillaAsync(int id, CancellationToken token) 
+        public async Task<ActionResult<APIResponse>> DeleteVillaAsync(int id, CancellationToken token)
         {
             try
             {
@@ -152,9 +152,9 @@ namespace MagicVilla_VillaAPI.Controllers
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.IsSuccess = false;
-                    return BadRequest(_response); 
+                    return BadRequest(_response);
                 }
-                    
+
                 var villa = await _dbVilla.GetAsync(token, u => u.Id == id);
                 if (villa == null)
                 {
@@ -168,7 +168,7 @@ namespace MagicVilla_VillaAPI.Controllers
                 _response.IsSuccess = true;
                 return Ok(_response);
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 _response.IsSuccess = false;
                 _response.ErrorMessages
@@ -180,7 +180,7 @@ namespace MagicVilla_VillaAPI.Controllers
 
         [HttpPut("{id:int}", Name = "UpdateVilla")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType (StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<APIResponse>> UpdateVillaAsync(int id, [FromBody] VillaUpdateDTO updateDTO, CancellationToken token)
         {
@@ -192,7 +192,7 @@ namespace MagicVilla_VillaAPI.Controllers
                     _response.IsSuccess = false;
                     return BadRequest(_response);
                 }
-                    
+
 
                 Villa model = _mapper.Map<Villa>(updateDTO);
 
@@ -201,8 +201,8 @@ namespace MagicVilla_VillaAPI.Controllers
                 _response.IsSuccess = true;
                 return Ok(_response);
             }
-            catch(Exception ex)
-            { 
+            catch (Exception ex)
+            {
                 _response.IsSuccess = false;
                 _response.ErrorMessages
                     = new List<string>() { ex.ToString() };
@@ -220,7 +220,7 @@ namespace MagicVilla_VillaAPI.Controllers
             {
                 if (patchDTO is null || id <= 0)
                 {
-                    _response.StatusCode = HttpStatusCode.BadRequest; 
+                    _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.IsSuccess = false;
                     return BadRequest(_response);
                 }
@@ -229,7 +229,7 @@ namespace MagicVilla_VillaAPI.Controllers
 
                 if (villa == null)
                 {
-                    _response.StatusCode=HttpStatusCode.BadRequest;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.IsSuccess = false;
                     return BadRequest(_response);
                 }
@@ -255,7 +255,7 @@ namespace MagicVilla_VillaAPI.Controllers
                     = new List<string>() { ex.Message };
             }
             return _response;
-            
+
         }
     }
 }

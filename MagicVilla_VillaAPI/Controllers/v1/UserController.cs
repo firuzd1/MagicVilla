@@ -4,7 +4,7 @@ using MagicVilla_VillaAPI.Repository.IRepository;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace MagicVilla_VillaAPI.Controllers
+namespace MagicVilla_VillaAPI.Controllers.v1
 {
     [Route("api/v{version:apiVersion}/UsersAuth")]
     [ApiController]
@@ -15,7 +15,7 @@ namespace MagicVilla_VillaAPI.Controllers
         public UserController(IUserRepository userRepository)
         {
             _userRepository = userRepository;
-            this._response = new();
+            _response = new();
         }
 
         [HttpPost("login")]
@@ -23,11 +23,11 @@ namespace MagicVilla_VillaAPI.Controllers
         {
             LoginResponseDTO loginResponseDTO = await _userRepository.Login(model);
 
-            if(loginResponseDTO.User == null || string.IsNullOrEmpty(loginResponseDTO.Token)) 
+            if (loginResponseDTO.User == null || string.IsNullOrEmpty(loginResponseDTO.Token))
             {
                 _response.StatusCode = HttpStatusCode.BadRequest;
                 _response.IsSuccess = false;
-                _response.ErrorMessages 
+                _response.ErrorMessages
                     = new List<string> { "username or password is incorrect" };
                 return BadRequest(_response);
             }
@@ -45,15 +45,15 @@ namespace MagicVilla_VillaAPI.Controllers
 
             if (!ifUsernameUnique)
             {
-                _response.StatusCode=HttpStatusCode.BadRequest;
+                _response.StatusCode = HttpStatusCode.BadRequest;
                 _response.IsSuccess = false;
-                _response.ErrorMessages 
-                    = new List<string>{ "Username is already exists" };
+                _response.ErrorMessages
+                    = new List<string> { "Username is already exists" };
                 return BadRequest(_response);
             }
 
             LocalUser user = await _userRepository.Register(model);
-            if(user == null)
+            if (user == null)
             {
                 _response.StatusCode = HttpStatusCode.BadRequest;
                 _response.IsSuccess = false;

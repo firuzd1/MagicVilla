@@ -6,30 +6,30 @@ using Microsoft.AspNetCore.Http;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MagicVilla_VillaAPI.Controllers
+namespace MagicVilla_VillaAPI.Controllers.v1
 {
     [Route("api/v{version:apiVersion}/VillaNumberAPI")]
     [ApiController]
     [ApiVersion("1.0")]
-    [ApiVersion("2.0")]
     public class VillaNumberAPIController : Controller
     {
         private readonly IVillaNumberRepository _villaNumber;
         private readonly IVillaRepository _dbVilla;
         private readonly IMapper _mapper;
         private readonly APIResponse _response;
-       public VillaNumberAPIController(IVillaNumberRepository villaNumber, IMapper mapper, IVillaRepository dbVilla)
+        public VillaNumberAPIController(IVillaNumberRepository villaNumber, IMapper mapper, IVillaRepository dbVilla)
         {
             _villaNumber = villaNumber;
             _mapper = mapper;
-            this._response = new();
+            _response = new();
             _dbVilla = dbVilla;
         }
 
         [HttpGet]
+        [MapToApiVersion("1.0")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<APIResponse>> GetAllNumbersAsync(CancellationToken token) 
+        public async Task<ActionResult<APIResponse>> GetAllNumbersAsync(CancellationToken token)
         {
             try
             {
@@ -38,7 +38,7 @@ namespace MagicVilla_VillaAPI.Controllers
                 _response.StatusCode = HttpStatusCode.OK;
                 return _response;
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _response.IsSuccess = false;
                 _response.StatusCode = HttpStatusCode.InternalServerError;
@@ -49,7 +49,6 @@ namespace MagicVilla_VillaAPI.Controllers
         }
 
         [HttpPost]
-        [MapToApiVersion("1.0")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<APIResponse>> CreateVillaNumberAsync([FromBody] VillaNumberCreateDTO villaNumberCreateDTO, CancellationToken token)
@@ -77,7 +76,7 @@ namespace MagicVilla_VillaAPI.Controllers
                     return BadRequest(_response);
                 }
 
-                if(await _dbVilla.GetAsync(token, u => u.Id == villaNumberCreateDTO.VillaID) == null)
+                if (await _dbVilla.GetAsync(token, u => u.Id == villaNumberCreateDTO.VillaID) == null)
                 {
                     ModelState.AddModelError("CustomError", "Villa ID is invalid!");
                     return BadRequest(ModelState);
@@ -89,9 +88,9 @@ namespace MagicVilla_VillaAPI.Controllers
                 _response.StatusCode = HttpStatusCode.Created;
                 return CreatedAtRoute("GetVillaNumber", new { id = tempVillanumber.VillaNo }, _response);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
-                _response.IsSuccess =false;
+                _response.IsSuccess = false;
                 _response.StatusCode = HttpStatusCode.BadRequest;
                 _response.ErrorMessages
                     = new List<string>() { ex.Message.ToString() };
@@ -99,12 +98,6 @@ namespace MagicVilla_VillaAPI.Controllers
             return _response;
         }
 
-        [MapToApiVersion("2.0")]
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "Value1", "Value2" };
-        }
 
         [HttpGet("{id:int}", Name = "GetVillaNumber")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -137,7 +130,7 @@ namespace MagicVilla_VillaAPI.Controllers
                 _response.Result = villaNumberDTO;
                 return Ok(_response);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _response.IsSuccess = false;
                 _response.StatusCode = HttpStatusCode.BadRequest;
@@ -145,7 +138,7 @@ namespace MagicVilla_VillaAPI.Controllers
                     = new List<string>() { ex.Message.ToString() };
                 return BadRequest(_response);
             }
-            
+
         }
 
         [HttpDelete("{id:int}", Name = "RemoveVillaNumberAsync")]
@@ -184,7 +177,7 @@ namespace MagicVilla_VillaAPI.Controllers
                 await _villaNumber.RemoveAsync(tempVilla, token);
                 return NoContent();
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _response.IsSuccess = false;
                 _response.StatusCode = HttpStatusCode.BadRequest;
@@ -235,8 +228,8 @@ namespace MagicVilla_VillaAPI.Controllers
                 villaNumber = _mapper.Map<VillaNumber>(updateDTO);
                 await _villaNumber.UpdateVillaNumberAsync(villaNumber, createdDate, token);
                 return NoContent();
-            } 
-            catch (Exception ex) 
+            }
+            catch (Exception ex)
             {
                 _response.IsSuccess = false;
                 _response.StatusCode = HttpStatusCode.BadRequest;
